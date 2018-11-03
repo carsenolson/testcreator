@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Create New Test</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    </head>
+    <body>
+            <div class="row">
+                <div class="col">
+                    <div class="d-block p-3 bg-dark text-white"><h3><a href="../index.html">Home/</a>Create Test Page</h3></div>
+                </div>
+            </div>
+            <p></p>
+            <p></p>
+            <div class="row">
+                <div class="col-sm-4">
+                    <ol id="questionStatus">
+
+                    </ol>
+                </div>
+                <div class="col">
+                    <input type="text" id="testName" class="w-50" placeholder="Test name">
+                    <input type="text" id="time" class="w-25 mt-1" placeholder="Time">
+                    <input type="text" id="imageLink" class="w-75 mt-4" placeholder="Image Link">
+                    <input type="text" id="question" class="w-75 mt-1" placeholder="Question">
+                    <div id="answerArea">
+
+                    </div>
+                    <input type="text" id="trueAnswer" class="w-50 mt-3" placeholder="Right Answers">
+                    <small id="emailHelp" class="form-text text-muted">Just write numbers it's not working with numbers that content two or more digits</small>
+                    <button type="button" id="addAnswer" class="btn btn-primary">+</button>
+                    <button type="button" id="removeAnswer" class="btn btn-danger">-</button>
+                    <button type="button" id="newQuestion" class="btn btn-warning">Add Question</button> <p></p>
+                    <button type="button" id="uploadTest" class="btn btn-success">Upload test</button>
+                </div>
+
+            </div>
+
+        <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase.js"></script>
+
+        <script>
+            const {ipcRenderer} = require('electron');
+
+            var test = {
+                test_name: "",
+                tm: 0,
+                questions: []
+            };
+
+            var testName = document.getElementById('testName');
+            var time = document.getElementById('time');
+            var imageLink = document.getElementById('imageLink');
+            var question = document.getElementById('question');
+            var trueAnswer = document.getElementById('trueAnswer');
+
+
+            var addAnswer = document.getElementById('addAnswer');
+            var removeAnswer = document.getElementById('removeAnswer');
+            var newQuestion = document.getElementById('newQuestion');
+            var uploadTest = document.getElementById('uploadTest');
+
+            var answerArea = document.getElementById('answerArea');
+            var questionStatus = document.getElementById('questionStatus');
+
+            ipcRenderer.send('asynchronous-message', 1);
+            ipcRenderer.on('asynchronous-reply', (event, arg) => {
+                config = arg;
+                firebase.initializeApp(arg);
+                //var database = firebase.database();
+                //var ref = database.ref('tests')
+                //ref.push(data);
+            });
+
+            var i = 1;
+            addAnswer.onclick = () => {
+                var answerInput = document.createElement('input');
+                answerInput.setAttribute('class', 'w-75 mt-1');
+                answerInput.setAttribute('placeholder', 'answer ' + i);
+                answerArea.appendChild(answerInput);
+                i++;
+            };
+
+            removeAnswer.onclick = () => {
+                answerArea.lastElementChild.remove();
+                i--;
+            };
+
+            uploadTest.onclick = () => {
+                console.log("hey");
+                test.test_name = testName.value;
+                test.tm = time.value;
+                var database = firebase.database();
+                database.ref('tests').push(test);
+            };
+
+            newQuestion.onclick = () => {
+                i = 1;
+                var questionPath = document.createElement('li');
+                var p = document.createElement('p');
+
+                var parsedTrueAnswers = [];
+                var answers = [];
+                var unparsedTrueAnswer = trueAnswer.value;
+                for (var i = 0; i < unparsedTrueAnswer.length; i++) {
+                    if (unparsedTrueAnswer[i] == "," || unparsedTrueAnswer[i] == " ")
+                        continue;
+                    else
+                     parsedTrueAnswers.push(Number(unparsedTrueAnswer[i]));
+                }
+                for (var i = 0; i < answerArea.children.length; i++) {
+                    answers.push(answerArea.children[i].value);
+                }
+
+                test.questions.push({question: question.value, answers: answers, rightansw: parsedTrueAnswers, link: imageLink.value});
+                console.log(test);
+
+                questionPath.innerHTML = question.value.substring(0, 20) + '...';
+                questionStatus.appendChild(questionPath);
+
+                question.value = "";
+                trueAnswer.value = "";
+                imageLink.value = "";
+
+                while(answerArea.firstElementChild)
+                    answerArea.firstElementChild.remove();
+
+                i = 0;
+            };
+
+            /*
+                Write function uploadTest.
+                Write students' lists page.
+                Write schooltester.
+                Make a presentation.
+                ...
+            */
+
+
+            /*
+                test data structure:
+                unic id (provided by firebase)
+                {
+                    testName: "",
+                    time: number,
+                    questions: [
+                        {
+                            question: "",
+                            answers: ["","",...],
+                            trueAnswers: [num, num, ...],
+                            link: ""
+                        },
+
+                        {
+                            question: "",
+                            answers: ["","",...],
+                            trueAnswers: [num, num, ...],
+                            link: ""
+                        }
+                        ...
+                    ]
+                }
+            */
+
+        </script>
+
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+
+    </body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "schooltester",
+  "version": "1.0.0",
+  "description": "this program is for creating test for students",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Gashilov Dmitry",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^2.0.3"
+  }
+}
